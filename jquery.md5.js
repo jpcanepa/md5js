@@ -83,7 +83,23 @@
         paddedData.set(value, 0);
         paddedData.set(padding, byteLength);
 
-        return digest;
+        console.log("The padded that is now " + paddedData.byteLength + " bytes long (" + (paddedData.byteLength * 8) + " bits)");
+
+        /* Append the length of the string, modulo 2^64 to the data 
+         * FIXME: currently, there is no way to even represent a number 
+         * larger than 32bit without resorting to something like BigNumber,
+         * so here just assume the length is < 2^64. If the actual data 
+         * is larger it will produce wrong results (assuming that you 
+         * managed to load that amount of data in the first place into 
+         * your script. */
+        paddedData.set([
+                ((byteLength & 0x000000ff) >> 0), 
+                ((byteLength & 0x0000ff00) >> 8),
+                ((byteLength & 0x00ff0000) >> 16),
+                ((byteLength & 0xff000000) >> 24)
+                ], byteLength + padding.length);
+
+        return paddedData;
     };
 
 }(jQuery));
