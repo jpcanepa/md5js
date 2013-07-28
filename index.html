@@ -11,10 +11,9 @@
     <script type="text/javascript" src="jquery.md5.js"></script>
     <script type="text/javascript">
     $(document).ready(function () {
-        $('#data').change(function() {
-            var data = $.fn.fromUTF16String($('#data').val()),
-                asHex = "(" + data.length + ") [";
-
+        function asHex(data)
+        {
+            var asHex = "(" + data.length + ") [";
             for( i = 0 ; i < data.length ; ++i)
             {
                 if(i > 0)
@@ -22,10 +21,14 @@
                 asHex += data[i].toString(16);
             }
             asHex += "]";
+            return asHex;
+        }
 
-            $('#out').text(asHex);
+        $('#data').change(function() {
+            var data = $.fn.fromUTF16String($('#data').val());
 
-            $.fn.md5(data);
+
+            $('#out').text(asHex($.fn.md5(data)));
         });
     })
     </script>
