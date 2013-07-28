@@ -1,0 +1,88 @@
+;(function($, undefined) {
+    var consts = new Uint32Array([
+            0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
+            0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
+            0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
+            0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
+            0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa,
+            0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
+            0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed,
+            0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
+            0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c,
+            0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
+            0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05,
+            0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
+            0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,
+            0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
+            0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
+            0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 
+        ]),
+        shifts = new Uint8Array([
+            7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+            5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+            4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+            6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
+        ]),
+        inital = new Uint32Array([
+            0x67452301,
+            0xefcdab89,
+            0x98badcfe,
+            0x10325476
+        ]);
+
+    $.fn.fromUTF16String = function(string) {
+        var stringLength = string.length,
+            data = new ArrayBuffer( 2 * stringLength ),
+            view16 = new Uint16Array(data),
+            i = 0;
+
+        for(i = 0; i < stringLength ; ++i) {
+            view16[i] = string.charCodeAt(i);
+        }
+
+        return new Uint8Array(data);
+    };
+
+
+    /* Expose the MD5 digest function
+     *
+     * @param value An Uint8Array with the data to obtatin the digest for.
+     *
+     * @return An Uint8Array with the MD5 digest of the data */
+    $.fn.md5 = function(value) {
+        var byteLength = value.byteLength,
+            bitLength = byteLength * 8,
+            paddedBitLength = 0,
+            zeroPadLength = 0,
+            padding, i,
+            paddedData,
+            digest;
+
+        /* Calculate the amount of padding needed */
+        console.log("Original message is " + byteLength + " bytes long (" + bitLength + " bits)");
+        /* 1 bit padding, followed by as many zeroes as needed to reach 
+         * a bit length of 448 (mod 512) */
+        paddedBitLength = bitLength + 1;
+        console.log("After appending 1 bit, the message is " + paddedBitLength + " bits long (" + paddedBitLength % 512 + " bits [mod512])");
+        if(paddedBitLength % 512 < 448) {
+            zeroPadLength += 448 - (paddedBitLength % 512);
+        } else if(paddedBitLength % 512 > 448) {
+            zeroPadLength += 448 + (512 - (paddedBitLength % 512));
+        }
+        console.log("Will have to pad with " + zeroPadLength + " zero bits (needs " + ((zeroPadLength + 1) / 8) + " bytes)"); 
+
+        /* Initialize the padding buffer */
+        padding = new Uint8Array((zeroPadLength + 1) / 8);
+        padding[0] = 0x80;
+        for(i = 1 ; i < padding.length ; ++i) {
+            padding[i] = 0;
+        }
+
+        paddedData = new Uint8Array(byteLength + padding.length);
+        paddedData.set(value, 0);
+        paddedData.set(padding, byteLength);
+
+        return digest;
+    };
+
+}(jQuery));

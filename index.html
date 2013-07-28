@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jQuery MD5</title>
+</head>
+<body>
+    <input id="data" name="data"></input>
+    <div id="out"></div>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.md5.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#data').change(function() {
+            var data = $.fn.fromUTF16String($('#data').val()),
+                asHex = "(" + data.length + ") [";
+
+            for( i = 0 ; i < data.length ; ++i)
+            {
+                if(i > 0)
+                    asHex += " ";
+                asHex += data[i].toString(16);
+            }
+            asHex += "]";
+
+            $('#out').text(asHex);
+
+            $.fn.md5(data);
+        });
+    })
+    </script>
+</body>
+</html>
