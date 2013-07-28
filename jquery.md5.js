@@ -78,7 +78,8 @@
             padding[i] = 0;
         }
 
-        paddedData = new Uint8Array(byteLength + padding.length);
+        /* Append padding to original data (and the 64 bytes for the length) */
+        paddedData = new Uint8Array(byteLength + padding.length + 8);
         paddedData.set(value, 0);
         paddedData.set(padding, byteLength);
 
