@@ -132,10 +132,10 @@
          * managed to load that amount of data in the first place into 
          * your script. */
         paddedData.set([
-                ((bitLength & 0x000000ff) >> 0), 
-                ((bitLength & 0x0000ff00) >> 8),
-                ((bitLength & 0x00ff0000) >> 16),
-                ((bitLength & 0xff000000) >> 24)
+                ((bitLength & 0x000000ff) >>> 0), 
+                ((bitLength & 0x0000ff00) >>> 8),
+                ((bitLength & 0x00ff0000) >>> 16),
+                ((bitLength & 0xff000000) >>> 24)
                 ], byteLength + padding.length);
 
         /* Process each 512bit chunk */
