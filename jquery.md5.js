@@ -23,12 +23,25 @@
             4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
             6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
         ]),
-        inital = new Uint32Array([
+        initial = new Uint32Array([
             0x67452301,
             0xefcdab89,
             0x98badcfe,
             0x10325476
         ]);
+
+    $.fn.fromUTF8String = function(string) {
+        var stringLength = string.length,
+            data = new ArrayBuffer( stringLength ),
+            view8 = new Uint8Array(data),
+            i = 0;
+
+        for(i = 0; i < stringLength ; ++i) {
+            view8[i] = string.charCodeAt(i);
+        }
+
+        return new Uint8Array(data);
+    };
 
     $.fn.fromUTF16String = function(string) {
         var stringLength = string.length,
@@ -43,6 +56,71 @@
         return new Uint8Array(data);
     };
 
+
+    function processChunks(data, initial, shifts, contst) {
+        var chunkCount = (data.byteLength * 8) / 512,
+            currentChunk = 0,
+            currentChunkOffset = 0,
+            chunkInitial = new Uint32Array(initial), /* a0, b0, c0, d0 */
+            digestBuffers = new Uint32Array(4), /* A, B, C, D */
+            chunkBuffers = new Uint32Array(data.buffer), /* M[i] (0 <= i < 16) */
+            tempBuffer = new Uint32Array(1), /* F */
+            tempIndex  = new Uint8Array(1), /* g */
+            tempD = new Uint32Array(1),
+            leftRotate = function (data, amount) {
+                var rotated = ((data << amount) | (data >>> (32 - amount))) >>> 0;
+                console.log("LEFTROTATE: " + (data >>> 0) + " -> " + rotated);
+                return rotated;
+            },
+            i;
+
+        /* Process each chunk */
+        while(currentChunk < chunkCount)
+        {
+            /* Initialize A,B,C and D */
+            digestBuffers.set(chunkInitial, 0);
+
+            for(i = 0 ; i < 64 ; ++i)
+            {
+                if( i < 16 ) {
+                    tempBuffer[0] = (digestBuffers[1] & digestBuffers[2]) | ((~digestBuffers[1]) & digestBuffers[3]);
+                    tempIndex[0] = i;
+                } else if (i < 32) {
+                    tempBuffer[0] = (digestBuffers[3] & digestBuffers[1]) | ((~digestBuffers[3]) & digestBuffers[2]); 
+                    tempIndex[0] = (5 * i + 1) % 16; 
+                } else if (i < 48) {
+                    tempBuffer[0] = (digestBuffers[1] ^ digestBuffers[2]) ^ digestBuffers[3];
+                    tempIndex[0] = (3 * i + 5) % 16;
+                } else {
+                    tempBuffer[0] = digestBuffers[2] ^ (digestBuffers[1] | (~digestBuffers[3]));
+                    tempIndex[0] = (7 * i) % 16;
+                }
+
+                console.log("[" + i + "] F:" + tempBuffer[0] + " g:" + tempIndex[0]);
+
+                console.log("[" + i + "a] A:" + digestBuffers[0] + " B:" + digestBuffers[1] + " C:" + digestBuffers[2] + " D:" + digestBuffers[3]);
+
+                tempD[0] = digestBuffers[3];
+                digestBuffers[3] = digestBuffers[2];
+                digestBuffers[2] = digestBuffers[1];
+                digestBuffers[1] = digestBuffers[1] + leftRotate(digestBuffers[0] + tempBuffer[0] + consts[i] + chunkBuffers[tempIndex[0]], shifts[i]);
+                digestBuffers[0] = tempD[0];
+
+                console.log("[" + i + "b] A:" + digestBuffers[0] + " B:" + digestBuffers[1] + " C:" + digestBuffers[2] + " D:" + digestBuffers[3]);
+            }
+
+            chunkInitial[0] += digestBuffers[0];
+            chunkInitial[1] += digestBuffers[1];
+            chunkInitial[2] += digestBuffers[2];
+            chunkInitial[3] += digestBuffers[3];
+
+
+            ++currentChunk;
+            currentChunkOffset += 64; /* Move to the next 512bit (64 byte) chunk */
+        }
+
+        return new Uint8Array(chunkInitial.buffer);
+    }
 
     /* Expose the MD5 digest function
      *
@@ -85,7 +163,7 @@
 
         console.log("The padded that is now " + paddedData.byteLength + " bytes long (" + (paddedData.byteLength * 8) + " bits)");
 
-        /* Append the length of the string, modulo 2^64 to the data 
+        /* Append the length *in bits* of the initial message, modulo 2^64 to the data 
          * FIXME: currently, there is no way to even represent a number 
          * larger than 32bit without resorting to something like BigNumber,
          * so here just assume the length is < 2^64. If the actual data 
@@ -93,13 +171,17 @@
          * managed to load that amount of data in the first place into 
          * your script. */
         paddedData.set([
-                ((byteLength & 0x000000ff) >> 0), 
-                ((byteLength & 0x0000ff00) >> 8),
-                ((byteLength & 0x00ff0000) >> 16),
-                ((byteLength & 0xff000000) >> 24)
+                ((bitLength & 0x000000ff) >> 0), 
+                ((bitLength & 0x0000ff00) >> 8),
+                ((bitLength & 0x00ff0000) >> 16),
+                ((bitLength & 0xff000000) >> 24)
                 ], byteLength + padding.length);
 
-        return paddedData;
+        console.log(paddedData);
+
+        /* Process each 512bit chunk */
+        var lol = processChunks(paddedData, initial, shifts, consts);
+        return lol;
     };
 
 }(jQuery));
