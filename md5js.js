@@ -1,4 +1,4 @@
-;(function($, undefined) {
+;(function(window, undefined) {
     var consts = new Uint32Array([
             0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
             0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
@@ -29,32 +29,6 @@
             0x98badcfe,
             0x10325476
         ]);
-
-    $.fn.fromUTF8String = function(string) {
-        var stringLength = string.length,
-            data = new ArrayBuffer( stringLength ),
-            view8 = new Uint8Array(data),
-            i = 0;
-
-        for(i = 0; i < stringLength ; ++i) {
-            view8[i] = string.charCodeAt(i);
-        }
-
-        return new Uint8Array(data);
-    };
-
-    $.fn.fromUTF16String = function(string) {
-        var stringLength = string.length,
-            data = new ArrayBuffer( 2 * stringLength ),
-            view16 = new Uint16Array(data),
-            i = 0;
-
-        for(i = 0; i < stringLength ; ++i) {
-            view16[i] = string.charCodeAt(i);
-        }
-
-        return new Uint8Array(data);
-    };
 
 
     function processChunks(data, initial, shifts, contst) {
@@ -127,7 +101,7 @@
      * @param value An Uint8Array with the data to obtatin the digest for.
      *
      * @return An Uint8Array with the MD5 digest of the data */
-    $.fn.md5 = function(value) {
+    window.md5 = function(value) {
         var byteLength = value.byteLength,
             bitLength = byteLength * 8,
             paddedBitLength = 0,
@@ -184,4 +158,4 @@
         return lol;
     };
 
-}(jQuery));
+}(window));
