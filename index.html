@@ -5,7 +5,22 @@
 </head>
 <body>
     <input id="data" name="data"></input>
-    <div id="out"></div>
+    <div>
+        <span>Empty-in:</span>
+        <span id="empty-in"></span>
+    </div>
+    <div>
+        <span>Empty-out:</span>
+        <span id="empty"></span>
+    </div>
+    <div>
+        <span>Box-in:</span>
+        <span id="out-in"></span>
+    </div>
+    <div>
+        <span>Box:</span>
+        <span id="out"></span>
+    </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="jquery.md5.js"></script>
@@ -13,23 +28,35 @@
     $(document).ready(function () {
         function asHex(data)
         {
-            var asHex = "(" + data.length + ") [";
+            var asHex = "(" + data.length + ") [",
+            temp;
+
             for( i = 0 ; i < data.length ; ++i)
             {
                 if(i > 0)
                     asHex += " ";
-                asHex += data[i].toString(16);
+                temp = data[i].toString(16);
+                if(temp.length == 1) {
+                    temp = "0" + temp;
+                }
+                asHex += temp;
+
             }
             asHex += "]";
             return asHex;
         }
 
         $('#data').change(function() {
-            var data = $.fn.fromUTF16String($('#data').val());
+            var data = $.fn.fromUTF8String($('#data').val());
 
+            $('#out-in').text(asHex(data));
 
             $('#out').text(asHex($.fn.md5(data)));
         });
+        
+        var emptyString = $.fn.fromUTF8String("");
+        $('#empty-in').text(asHex(emptyString));
+        $('#empty').text(asHex($.fn.md5(emptyString)));
     })
     </script>
 </body>
