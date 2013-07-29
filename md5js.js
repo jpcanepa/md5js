@@ -43,7 +43,6 @@
             tempD = new Uint32Array(1),
             leftRotate = function (data, amount) {
                 var rotated = ((data << amount) | (data >>> (32 - amount))) >>> 0;
-                console.log("LEFTROTATE: " + (data >>> 0) + " -> " + rotated);
                 return rotated;
             },
             i;
@@ -70,9 +69,7 @@
                     tempIndex[0] = (7 * i) % 16;
                 }
 
-                console.log("[" + i + "] F:" + tempBuffer[0] + " g:" + tempIndex[0]);
 
-                console.log("[" + i + "a] A:" + digestBuffers[0] + " B:" + digestBuffers[1] + " C:" + digestBuffers[2] + " D:" + digestBuffers[3]);
 
                 tempD[0] = digestBuffers[3];
                 digestBuffers[3] = digestBuffers[2];
@@ -80,7 +77,6 @@
                 digestBuffers[1] = digestBuffers[1] + leftRotate(digestBuffers[0] + tempBuffer[0] + consts[i] + chunkBuffers[tempIndex[0]], shifts[i]);
                 digestBuffers[0] = tempD[0];
 
-                console.log("[" + i + "b] A:" + digestBuffers[0] + " B:" + digestBuffers[1] + " C:" + digestBuffers[2] + " D:" + digestBuffers[3]);
             }
 
             chunkInitial[0] += digestBuffers[0];
@@ -111,17 +107,14 @@
             digest;
 
         /* Calculate the amount of padding needed */
-        console.log("Original message is " + byteLength + " bytes long (" + bitLength + " bits)");
         /* 1 bit padding, followed by as many zeroes as needed to reach 
          * a bit length of 448 (mod 512) */
         paddedBitLength = bitLength + 1;
-        console.log("After appending 1 bit, the message is " + paddedBitLength + " bits long (" + paddedBitLength % 512 + " bits [mod512])");
         if(paddedBitLength % 512 < 448) {
             zeroPadLength += 448 - (paddedBitLength % 512);
         } else if(paddedBitLength % 512 > 448) {
             zeroPadLength += 448 + (512 - (paddedBitLength % 512));
         }
-        console.log("Will have to pad with " + zeroPadLength + " zero bits (needs " + ((zeroPadLength + 1) / 8) + " bytes)"); 
 
         /* Initialize the padding buffer */
         padding = new Uint8Array((zeroPadLength + 1) / 8);
@@ -134,8 +127,6 @@
         paddedData = new Uint8Array(byteLength + padding.length + 8);
         paddedData.set(value, 0);
         paddedData.set(padding, byteLength);
-
-        console.log("The padded that is now " + paddedData.byteLength + " bytes long (" + (paddedData.byteLength * 8) + " bits)");
 
         /* Append the length *in bits* of the initial message, modulo 2^64 to the data 
          * FIXME: currently, there is no way to even represent a number 
@@ -151,7 +142,6 @@
                 ((bitLength & 0xff000000) >> 24)
                 ], byteLength + padding.length);
 
-        console.log(paddedData);
 
         /* Process each 512bit chunk */
         var lol = processChunks(paddedData, initial, shifts, consts);
