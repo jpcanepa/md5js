@@ -69,21 +69,17 @@
                     tempIndex[0] = (7 * i) % 16;
                 }
 
-
-
                 tempD[0] = digestBuffers[3];
                 digestBuffers[3] = digestBuffers[2];
                 digestBuffers[2] = digestBuffers[1];
                 digestBuffers[1] = digestBuffers[1] + leftRotate(digestBuffers[0] + tempBuffer[0] + consts[i] + chunkBuffers[tempIndex[0]], shifts[i]);
                 digestBuffers[0] = tempD[0];
-
             }
 
             chunkInitial[0] += digestBuffers[0];
             chunkInitial[1] += digestBuffers[1];
             chunkInitial[2] += digestBuffers[2];
             chunkInitial[3] += digestBuffers[3];
-
 
             ++currentChunk;
             currentChunkOffset += 64; /* Move to the next 512bit (64 byte) chunk */
@@ -142,10 +138,8 @@
                 ((bitLength & 0xff000000) >> 24)
                 ], byteLength + padding.length);
 
-
         /* Process each 512bit chunk */
-        var lol = processChunks(paddedData, initial, shifts, consts);
-        return lol;
+        return processChunks(paddedData, initial, shifts, consts);
     };
 
 }(window));
